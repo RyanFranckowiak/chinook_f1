@@ -1,0 +1,91 @@
+---
+title: "first_feed"
+author: "Ryan Franckowiak"
+date: "2026-04-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#
+
+```{r}
+require(tidyverse)
+require(readxl)
+
+```
+
+#
+
+```{r}
+
+ff_wt <- read_excel("data/bi-weekly_weights_ff.xlsx", sheet = "biweekly")
+ff_wt
+
+```
+
+#
+
+```{r}
+
+# Calculate mean and standard deviation
+df_summary <- ff_wt %>%
+group_by(date, tank) %>%
+summarise(mean = mean(average), sd = sd(average), .groups = 'drop')
+
+# Plot with error bars
+ggplot(df_summary, aes(x = date, y = mean, color = tank)) +
+geom_line() +
+geom_point() +
+geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+theme_classic()
+
+```
+
+```{r}
+
+ffbio_wt <- read_excel("data/bi-weekly_weights_ff.xlsx", sheet = "bioplan")
+ffbio_wt
+
+```
+
+#
+
+```{r}
+
+# Plot with error bars
+ffbio_wt <- ffbio_wt %>% filter(week < 7)
+
+ggplot(ffbio_wt, aes(x = date, y = weight, color = tank)) +
+geom_line() +
+geom_point() +
+theme_classic()
+
+
+```
+
+#
+
+```{r}
+
+# Plot with two geom_line layers, each with its own grouping
+ggplot() +
+geom_line(data=df_summary, aes(x = date, y = mean, color = tank),linewidth = 2) +
+geom_point() +
+#geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
+theme_classic() +
+geom_line(data = ffbio_wt, aes(x = date, y = weight, color = tank), linewidth = 2, alpha = 0.5) +
+geom_point() +
+#  ) +
+  labs(
+    x = "Weight (g)",
+    y = "Time (Months)"
+  ) + theme_classic()
+```
+
+
+
+
+
